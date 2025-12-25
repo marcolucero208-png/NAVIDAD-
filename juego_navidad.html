@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta Navideña Interactiva</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(180deg, #0a1128 0%, #1a1a4e 50%, #2d1b3d 100%);
+            min-height: 100vh;
+            font-family: 'Crimson Text', serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Nieve cayendo */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: white;
+            font-size: 1.5em;
+            opacity: 0.8;
+            pointer-events: none;
+            animation: fall linear infinite;
+            z-index: 1000;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+        
+        /* Estrellas de fondo */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px white;
+            animation: twinkle 2s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        /* Pantalla de inicio */
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #8b0000, #006400, #8b0000);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s;
+        }
+        
+        .start-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .start-title {
+            font-family: 'Mountains of Christmas', cursive;
+            font-size: 4em;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            margin-bottom: 30px;
+            animation: glow 2s infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            50% { text-shadow: 0 0 40px rgba(255, 215, 0, 1); }
+        }
+        
+        .start-subtitle {
+            font-size: 1.5em;
+            color: #fff;
+            margin-bottom: 40px;
+            text-align: center;
+            padding: 0 20px;
+        }
+        
+        .start-button {
+            padding: 20px 50px;
+            font-size: 1.5em;
+            font-family: 'Mountains of Christmas', cursive;
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: white;
+            border: 3px solid #ffd700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+        }
+        
+        .start-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.6);
+        }
+        
+        /* Contenedor del juego */
+        .game-container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 40px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Árbol de Navidad interactivo */
+        .tree-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .tree {
+            display: inline-block;
+            position: relative;
+        }
+        
+        .tree-part {
+            color: #228b22;
+            font-size: 3em;
+            line-height: 0.6;
+            text-shadow: 0 0 10px #90ee90;
+        }
+        
+        .ornament {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid #ffd700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.2em;
+            box-shadow: 0 0 15px currentColor;
+        }
+        
+        .ornament:hover {
+            transform: scale(1.3) rotate(10deg);
+        }
+        
+        .ornament.collected {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        /* Colores de esferas */
+        .ornament-1 { background: #ff4444; top: 20%; left: 50%; }
+        .ornament-2 { background: #ffd700; top: 35%; left: 30%; }
+        .ornament-3 { background: #4169e1; top: 35%; right: 30%; }
+        .ornament-4 { background: #ff69b4; top: 50%; left: 25%; }
+        .ornament-5 { background: #9370db; top: 50%; right: 25%; }
+        .ornament-6 { background: #00ced1; top: 65%; left: 20%; }
+        .ornament-7 { background: #ff6347; top: 65%; right: 20%; }
+        .ornament-8 { background: #32cd32; top: 80%; left: 35%; }
+        
+        .progress {
+            text-align: center;
+            color: #ffd700;
+            font-size: 1.5em;
+            margin: 20px 0;
+            font-family: 'Mountains of Christmas', cursive;
+        }
+        
+        /* Mensaje que aparece */
+        .message-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            margin-top: 30px;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s;
+            border: 5px solid #ffd700;
+        }
+        
+        .message-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .message-title {
+            font-family: 'Mountains of Christmas', cursive;
+            font-size: 3em;
+            color: #c0392b;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .message-text {
+            font-size: 1.2em;
+            line-height: 2;
+            color: #2c3e50;
+            text-align: justify;
+            margin-bottom: 20px;
+        }
+        
+        .message-signature {
+            font-family: 'Mountains of Christmas', cursive;
+            font-size: 2em;
+            color: #c0392b;
+            text-align: center;
+            margin-top: 40px;
+            animation: heartbeat 2s infinite;
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            10%, 30% { transform: scale(1.05); }
+        }
+        
+        .instruction {
+            text-align: center;
+            color: #fff;
+            font-size: 1.5em;
+            margin: 20px 0;
+            font-family: 'Mountains of Christmas', cursive;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .hidden-message {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            .start-title {
+                font-size: 2.5em;
+            }
+            
+            .message-title {
+                font-size: 2em;
+            }
+            
+            .message-text {
+                font-size: 1.1em;
+            }
+            
+            .ornament {
+                width: 25px;
+                height: 25px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <!-- Pantalla de inicio -->
+    <div class="start-screen" id="startScreen">
+        <h1 class="start-title">🎄 Feliz Navidad Amor Mío 🎄</h1>
+        <p class="start-subtitle">Tengo un mensaje especial para ti...<br>¿Estás lista para descubrirlo?</p>
+        <button class="start-button" onclick="startGame()">✨ Comenzar ✨</button>
+    </div>
+    
+    <!-- Contenedor del juego -->
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <div class="instruction">
+            🎁 Haz clic en cada esfera del árbol (1-8) para revelar el mensaje 🎁
+        </div>
+        
+        <div class="progress" id="progress">
+            Esferas recogidas: <span id="collected">0</span> / 8
+        </div>
+        
+        <div class="tree-container">
+            <div class="tree">
+                <div style="font-size: 4em; color: #ffd700; text-shadow: 0 0 20px #ffd700;">⭐</div>
+                <div class="tree-part">🌲</div>
+                <div class="tree-part" style="font-size: 4em;">🌲</div>
+                <div class="tree-part" style="font-size: 5em;">🌲</div>
+                <div class="tree-part" style="font-size: 6em;">🌲</div>
+                <div style="font-size: 2em; color: #8b4513;">🪵</div>
+                
+                <!-- Esferas numeradas -->
+                <div class="ornament ornament-1" onclick="collectOrnament(1)">1</div>
+                <div class="ornament ornament-2" onclick="collectOrnament(2)">2</div>
+                <div class="ornament ornament-3" onclick="collectOrnament(3)">3</div>
+                <div class="ornament ornament-4" onclick="collectOrnament(4)">4</div>
+                <div class="ornament ornament-5" onclick="collectOrnament(5)">5</div>
+                <div class="ornament ornament-6" onclick="collectOrnament(6)">6</div>
+                <div class="ornament ornament-7" onclick="collectOrnament(7)">7</div>
+                <div class="ornament ornament-8" onclick="collectOrnament(8)">8</div>
+            </div>
+        </div>
+        
+        <div class="message-container" id="messageContainer">
+            <div class="message-title">Feliz Navidad Amor Mío</div>
+            
+            <div id="paragraph1" class="message-text hidden-message">
+                <p>Esta Navidad no llega con risas obligadas ni con recuerdos que lastiman. Llega despacio, como quien aprende a tocar un corazón herido sin volver a romperlo.</p>
+            </div>
+            
+            <div id="paragraph2" class="message-text hidden-message">
+                <p>Sé que hubo una Navidad que te hizo llorar, que te dejó silencios largos y una tristeza que nadie supo abrazar. Por eso hoy no quiero forzar la alegría, solo quiero quedarme contigo y cuidar lo que duele.</p>
+            </div>
+            
+            <div id="paragraph3" class="message-text hidden-message">
+                <p>Si alguna vez la Navidad te hizo llorar, hoy quiero que sepas que no estás sola, que mi amor es refugio, y que en mis brazos la tristeza no tiene permiso de quedarse.</p>
+            </div>
+            
+            <div id="paragraph4" class="message-text hidden-message">
+                <p>Si diciembre pesa, déjame cargarlo contigo. Si la noche se siente fría, déjame ser abrigo. Mi amor no necesita fechas, pero hoy quiere envolverte con más cuidado que nunca.</p>
+            </div>
+            
+            <div id="paragraph5" class="message-text hidden-message">
+                <p>No prometo una Navidad perfecta, pero sí una verdadera: con mi corazón cuidando el tuyo, con calma, con amor, con la certeza de que esta vez… todo será diferente.</p>
+            </div>
+            
+            <div id="paragraph6" class="message-text hidden-message">
+                <p>No vengo a borrar lo que dolió, vengo a quedarme para que no duela igual. Para que, si hay lágrimas, sean de alivio, porque el corazón por fin se siente en casa.</p>
+            </div>
+            
+            <div id="paragraph7" class="message-text hidden-message">
+                <p>Que esta Navidad sea distinta, no por lo que brille afuera, sino porque adentro hay alguien que te ama, que te elige todos los días, y que promete cuidar tu sonrisa como el regalo más valioso que tiene.</p>
+            </div>
+            
+            <div id="paragraph8" class="message-text hidden-message">
+                <p>Y si alguna vez dudas, mírame… aquí estoy, haciéndote un hogar en mi pecho, para que esta Navidad, por fin, sea un poco más tuya.</p>
+            </div>
+            
+            <div class="message-signature hidden-message" id="signature">
+                ❤️ Tu Niño de Ojitos Bonitos Te Ama Muchísimo ❤️
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let collected = 0;
+        const totalOrnaments = 8;
+        const collectedOrnaments = new Set();
+        
+        // Crear estrellas
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 150; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
+        
+        // Crear nieve
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            snowflake.innerHTML = '❄';
+            snowflake.style.left = Math.random() * 100 + '%';
+            snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            snowflake.style.opacity = Math.random() * 0.6 + 0.4;
+            snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+            document.body.appendChild(snowflake);
+            
+            setTimeout(() => {
+                snowflake.remove();
+            }, 5000);
+        }
+        
+        setInterval(createSnowflake, 200);
+        
+        // Función para iniciar el juego
+        function startGame() {
+            document.getElementById('startScreen').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('gameContainer').style.display = 'block';
+            }, 500);
+        }
+        
+        // Función para recoger esferas
+        function collectOrnament(number) {
+            if (collectedOrnaments.has(number)) {
+                return; // Ya fue recogida
+            }
+            
+            collectedOrnaments.add(number);
+            collected++;
+            
+            // Marcar esfera como recogida
+            const ornament = document.querySelector(`.ornament-${number}`);
+            ornament.classList.add('collected');
+            
+            // Actualizar contador
+            document.getElementById('collected').textContent = collected;
+            
+            // Mostrar párrafo correspondiente
+            const paragraph = document.getElementById(`paragraph${number}`);
+            paragraph.classList.remove('hidden-message');
+            paragraph.style.animation = 'fadeIn 1s ease-in';
+            
+            // Efecto de sonido (visual)
+            ornament.style.animation = 'bounce 0.5s';
+            
+            // Si recogió todas, mostrar mensaje completo
+            if (collected === totalOrnaments) {
+                setTimeout(() => {
+                    document.getElementById('signature').classList.remove('hidden-message');
+                    document.getElementById('messageContainer').classList.add('visible');
+                    
+                    // Fuegos artificiales (efecto visual)
+                    createFireworks();
+                }, 500);
+            } else {
+                document.getElementById('messageContainer').classList.add('visible');
+            }
+        }
+        
+        // Efecto de fuegos artificiales
+        function createFireworks() {
+            const colors = ['#ff4444', '#ffd700', '#4169e1', '#ff69b4', '#32cd32'];
+            
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.style.position = 'fixed';
+                    firework.style.left = Math.random() * 100 + '%';
+                    firework.style.top = Math.random() * 50 + '%';
+                    firework.style.width = '10px';
+                    firework.style.height = '10px';
+                    firework.style.borderRadius = '50%';
+                    firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    firework.style.boxShadow = `0 0 20px ${colors[Math.floor(Math.random() * colors.length)]}`;
+                    firework.style.zIndex = '9999';
+                    firework.style.animation = 'explode 1s ease-out';
+                    document.body.appendChild(firework);
+                    
+                    setTimeout(() => firework.remove(), 1000);
+                }, i * 100);
+            }
+        }
+        
+        // Añadir animación de explosión
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes explode {
+                0% { transform: scale(0); opacity: 1; }
+                100% { transform: scale(5); opacity: 0; }
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            
+            @keyframes bounce {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.5); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
